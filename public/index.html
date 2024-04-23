@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Nombres</title>
+    <!-- Agregar el enlace al archivo CSS de Tailwind -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+    <div class="w-full max-w-md">
+        <h1 class="text-3xl font-semibold mb-6 text-center">Registro de Nombres</h1>
+        <form id="registroForm" action="/registrar" method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="nombre">Nombre:</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="nombre" name="nombre" type="text" pattern="[A-Za-z\s]+" title="Solo letras y espacios" placeholder="Nombre" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="rut">RUT:</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="rut" name="rut" type="text" pattern="\d{7,8}-[\d|kK]{1}" title="Formato válido: 12345678-9" placeholder="RUT" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="fono">Teléfono:</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="fono" name="fono" type="tel" pattern="[0-9]{9}" title="Formato válido: 9 números" placeholder="Teléfono" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email:</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" name="email" type="email" placeholder="Email" required>
+                <p id="emailError" class="text-red-500 text-xs italic hidden">Ingrese un email válido.</p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="observacion">Observación:</label>
+                <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="observacion" name="observacion" placeholder="Observación"></textarea>
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="submitForm()">Registrar</button>
+                <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="resetForm()">Limpiar</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function submitForm() {
+            const form = document.getElementById('registroForm');
+            const nombre = form.nombre.value;
+            const rut = form.rut.value;
+            const fono = form.fono.value;
+            const email = form.email.value;
+            const observacion = form.observacion.value;
+
+            // Validar formato de RUT y teléfono
+            const rutRegex = /^\d{7,8}-[\d|kK]$/;
+            const fonoRegex = /^[0-9]{9}$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            let isValid = true;
+
+            if (!rutRegex.test(rut)) {
+                alert('El formato del RUT es incorrecto. Debe ser 12345678-9');
+                isValid = false;
+            }
+            if (!fonoRegex.test(fono)) {
+                alert('El formato del teléfono es incorrecto. Debe ser 9 números');
+                isValid = false;
+            }
+            if (!emailRegex.test(email)) {
+                document.getElementById('emailError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('emailError').classList.add('hidden');
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+            // Enviar los datos mediante fetch
+            fetch('/registrar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nombre, rut, fono, email, observacion })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Hubo un problema al registrar los datos.');
+                }
+                // Reiniciar el formulario después de enviar los datos
+                form.reset();
+                alert('Datos registrados correctamente');
+            })
+            .catch(error => {
+                console.error('Error:', error.message);
+                alert('Hubo un problema al registrar los datos.');
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('registroForm').reset();
+            document.getElementById('emailError').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
